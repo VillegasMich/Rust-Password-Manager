@@ -1,3 +1,6 @@
+use std::{fs, io};
+
+use crate::models::Password;
 extern crate dirs;
 pub fn path() -> String {
     let home: String = dirs::home_dir()
@@ -6,4 +9,41 @@ pub fn path() -> String {
         .expect("can not convert to str")
         .to_string();
     home + "/rustPM/passwords.json"
+}
+
+pub fn master_password() -> io::Result<String> {
+    //TODO set master password security
+    println!("Please enter the master password: ");
+    let mut master_1 = String::new();
+    let _ = io::stdin().read_line(&mut master_1);
+    println!("Please enter the master password again: ");
+    let mut master_2 = String::new();
+    let _ = io::stdin().read_line(&mut master_2);
+    if master_1 != master_2 {
+        Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "The passwords are different, please try again",
+        ))
+    } else {
+        Ok(master_1.trim().to_string())
+    }
+}
+
+pub fn check_existing_alias(pos_alias: String) -> io::Result<()> {
+    let path = path();
+    let contents_str = fs::read_to_string(path)?;
+    let contents: Vec<&str> = contents_str.split("\n").collect();
+    if contents.len() > 1 {
+        for password in contents {
+            let p: Password = serde_json::from_str(&password)?;
+            if p.alias == pos_alias {
+                return Err(io::Error::new(
+                    io::ErrorKind::AlreadyExists,
+                    "The alias already exists",
+                ));
+            };
+            // println!("alias -> {} password -> {}", p.alias, p.password);
+        }
+    }
+    Ok(())
 }

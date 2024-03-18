@@ -9,20 +9,28 @@ pub fn init() -> io::Result<()> {
             "File already exists",
         )),
         Err(_) => {
-            let home = dirs::home_dir()
-                .expect("Home dir not found")
-                .to_str()
-                .expect("can not convert to str")
-                .to_string();
-            fs::create_dir(home.clone() + "/rustPM")
-                .expect("Error creating the rpm dir on home directory");
-            let file = fs::File::create(utils::path());
-            match file {
-                Ok(_file) => {
-                    println!("passwords.json succesfull created in HOME directory");
-                    Ok(())
+            let master_pass = utils::master_password();
+            match master_pass {
+                Ok(password) => {
+                    let home = dirs::home_dir()
+                        .expect("Home dir not found")
+                        .to_str()
+                        .expect("can not convert to str")
+                        .to_string();
+                    fs::create_dir(home.clone() + "/rustPM")
+                        .expect("Error creating the rpm dir on home directory");
+                    let file = fs::File::create(utils::path());
+                    match file {
+                        Ok(_file) => {
+                            let master = "Master".to_string();
+                            println!("passwords.json succesfull created in HOME directory");
+                            save(&master, &password)?;
+                            Ok(())
+                        }
+                        Err(e) => Err(e),
+                    }
                 }
-                Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
+                Err(e) => Err(e),
             }
         }
     }
@@ -35,10 +43,13 @@ pub fn save(alias: &String, password: &String) -> io::Result<()> {
     };
     match file::exist() {
         Ok(_) => {
-            println!("Saving password {}...", new_password.alias);
             file::write(new_password)?;
+            println!(
+                "The password was succesfully saved with the alias `{}`",
+                alias
+            );
             Ok(())
         }
-        Err(e) => Err(io::Error::new(io::ErrorKind::NotFound, e)),
+        Err(e) => Err(e),
     }
 }
