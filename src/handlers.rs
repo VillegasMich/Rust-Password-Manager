@@ -53,3 +53,22 @@ pub fn save(alias: &String, password: &String) -> io::Result<()> {
         Err(e) => Err(e),
     }
 }
+
+pub fn list() -> io::Result<()> {
+    match file::exist() {
+        Ok(_) => match file::read() {
+            Ok(contents) => {
+                for password in contents {
+                    let p: models::Password = serde_json::from_str(&password)?;
+                    println!("{:?}", p);
+                }
+                Ok(())
+            }
+            Err(_) => Err(io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "You don't have any password to list",
+            )),
+        },
+        Err(e) => Err(e),
+    }
+}

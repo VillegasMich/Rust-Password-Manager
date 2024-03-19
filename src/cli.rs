@@ -52,7 +52,7 @@ pub fn parse() -> io::Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Some(Commands::Init) => handlers::init(),
-        Some(Commands::List) => Ok(()),
+        Some(Commands::List) => handlers::list(),
         Some(Commands::Inspect(_password)) => Ok(()),
         Some(Commands::Save(save)) => match (save.alias.clone(), save.password.clone()) {
             (Some(ref alias), Some(ref password)) => handlers::save(alias, password),

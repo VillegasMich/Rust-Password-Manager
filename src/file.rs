@@ -22,3 +22,11 @@ pub fn write(password: Password) -> io::Result<()> {
         Err(e) => Err(e),
     }
 }
+
+pub fn read() -> io::Result<Vec<String>> {
+    let path = utils::path();
+    let contents_str = fs::read_to_string(path)?;
+    let mut contents: Vec<String> = contents_str.split("\n").map(|s| s.to_string()).collect();
+    contents.remove(0);
+    Ok(contents)
+}

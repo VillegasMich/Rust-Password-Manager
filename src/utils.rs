@@ -1,6 +1,6 @@
-use std::{fs, io};
+use std::io;
 
-use crate::models::Password;
+use crate::{file, models::Password};
 extern crate dirs;
 pub fn path() -> String {
     let home: String = dirs::home_dir()
@@ -30,10 +30,8 @@ pub fn master_password() -> io::Result<String> {
 }
 
 pub fn check_existing_alias(pos_alias: String) -> io::Result<()> {
-    let path = path();
-    let contents_str = fs::read_to_string(path)?;
-    let contents: Vec<&str> = contents_str.split("\n").collect();
-    if contents.len() > 1 {
+    let contents = file::read()?;
+    if contents.len() > 0 {
         for password in contents {
             let p: Password = serde_json::from_str(&password)?;
             if p.alias == pos_alias {
