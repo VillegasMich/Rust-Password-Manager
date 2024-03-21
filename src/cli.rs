@@ -12,13 +12,13 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Creates passwords file in ~/rpm/
+    /// Creates passwords file in ~/rustPM/password.json
     Init,
     /// List all passwords
     List,
     /// Save a password <Alias> <Password>
     Save(Save),
-    // Delete a saved password
+    /// Delete a saved password <Alias>
     Delete(Delete),
 }
 

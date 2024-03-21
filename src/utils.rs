@@ -72,7 +72,6 @@ pub fn check_existing_alias(pos_alias: String) -> io::Result<()> {
                     "The alias already exists",
                 ));
             };
-            // println!("alias -> {} password -> {}", p.alias, p.password);
         }
     }
     Ok(())
