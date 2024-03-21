@@ -1,4 +1,5 @@
 use crate::{file, models, utils};
+use ansi_term::Style;
 use std::{fs, io};
 extern crate dirs;
 
@@ -15,12 +16,11 @@ pub fn init() -> io::Result<()> {
                     let home = dirs::home_dir()
                         .expect("Home dir not found")
                         .to_str()
-                        .expect("can not convert to str")
+                        .expect("Can not convert to str")
                         .to_string();
                     fs::create_dir(home.clone() + "/rustPM")
                         .expect("Error creating the rpm dir on home directory");
                     let file = fs::File::create(utils::path());
-                    //TODO The file is no empty when created
                     match file {
                         Ok(_file) => {
                             let master = "Master".to_string();
@@ -46,8 +46,8 @@ pub fn save(alias: &String, password: &String) -> io::Result<()> {
         Ok(_) => {
             file::write(new_password)?;
             println!(
-                "The password was succesfully saved with the alias `{}`",
-                alias
+                "The password was succesfully saved with the alias {}!",
+                Style::new().bold().paint(alias)
             );
             Ok(())
         }
@@ -74,24 +74,19 @@ pub fn list() -> io::Result<()> {
     }
 }
 
-// pub fn find(alias: &String) -> io::Result<()> {
-//     match file::exist() {
-//         Ok(_) => {
-//             let contents = file::read()?;
-//             for password in contents {
-//                 let p: models::Password = serde_json::from_str(&password)?;
-//                 if p.alias == alias.to_string() {
-//                     return Ok(());
-//                 }
-//             }
-//             Err(io::Error::new(
-//                 io::ErrorKind::NotFound,
-//                 "Password not found",
-//             ))
-//         }
-//         Err(e) => Err(e),
-//     }
-// }
+pub fn find(alias: &String) -> io::Result<()> {
+    match file::exist() {
+        Ok(_) => file::find_get(alias, 'f'),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn get(alias: &String) -> io::Result<()> {
+    match file::exist() {
+        Ok(_) => file::find_get(alias, 'g'),
+        Err(e) => Err(e),
+    }
+}
 
 pub fn delete(alias: &String) -> io::Result<()> {
     match file::exist() {

@@ -1,3 +1,4 @@
+use ansi_term::Style;
 use std::fs;
 use std::io;
 
@@ -68,4 +69,27 @@ pub fn delete(alias: &String) -> io::Result<()> {
             "Password not found",
         ))
     }
+}
+
+pub fn find_get(alias: &String, flag: char) -> io::Result<()> {
+    let contents = read()?;
+    for password in contents {
+        let p: models::Password = serde_json::from_str(&password)?;
+        if p.alias == alias.to_string() {
+            if flag == 'f' {
+                println!("{:?}", p);
+            } else if flag == 'g' {
+                utils::copy_to_clipboard(&p.password)?;
+                println!(
+                    "Password with alias {} copied to clipboard!",
+                    Style::new().bold().paint(p.alias)
+                );
+            }
+            return Ok(());
+        }
+    }
+    Err(io::Error::new(
+        io::ErrorKind::NotFound,
+        "Password not found",
+    ))
 }

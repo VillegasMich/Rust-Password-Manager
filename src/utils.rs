@@ -1,7 +1,7 @@
 use crate::models;
-use std::io;
-
 use crate::{file, models::Password};
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
+use std::io;
 extern crate dirs;
 pub fn path() -> String {
     let home: String = dirs::home_dir()
@@ -75,4 +75,20 @@ pub fn check_existing_alias(pos_alias: String) -> io::Result<()> {
         }
     }
     Ok(())
+}
+
+pub fn copy_to_clipboard(password: &String) -> io::Result<()> {
+    let mut ctx = ClipboardContext::new().unwrap();
+    let was_copied = ctx.set_contents(password.to_owned());
+    match was_copied {
+        Ok(_) => {
+            // Mandatory to copy the password - IDKY
+            let _ = ctx.get_contents().unwrap();
+            Ok(())
+        }
+        Err(_) => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unable to copy the password to you clipboard",
+        )),
+    }
 }
