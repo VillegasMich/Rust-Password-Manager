@@ -16,20 +16,10 @@ pub enum Commands {
     Init,
     /// List all passwords
     List,
-    /// Inspects a password
-    Inspect(Inspect),
     /// Save a password <Alias> <Password>
     Save(Save),
     // Delete a saved password
     Delete(Delete),
-}
-
-#[derive(Args)]
-pub struct Inspect {
-    /// The password to inspect
-    pub password: Option<String>,
-    #[arg(short = 'd', long = "decrypted")]
-    pub show_decrypted: bool,
 }
 
 #[derive(Args)]
@@ -43,9 +33,9 @@ pub struct Save {
 #[derive(Args)]
 pub struct Delete {
     /// The password to delete, if it is located
-    pub password: Option<String>,
-    #[arg(short = 'f', long = "force")]
-    pub force_delete: bool,
+    pub alias: Option<String>,
+    // #[arg(short = 'f', long = "force")]
+    // pub force_delete: bool,
 }
 
 pub fn parse() -> io::Result<()> {
@@ -53,23 +43,28 @@ pub fn parse() -> io::Result<()> {
     match &cli.command {
         Some(Commands::Init) => handlers::init(),
         Some(Commands::List) => handlers::list(),
-        Some(Commands::Inspect(_password)) => Ok(()),
         Some(Commands::Save(save)) => match (save.alias.clone(), save.password.clone()) {
             (Some(ref alias), Some(ref password)) => handlers::save(alias, password),
             (None, Some(ref _password)) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Alias not found",
+                "Alias argument not found",
             )),
             (Some(ref _alias), None) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Password not found",
+                "Password argument not found",
             )),
             (None, None) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Alias and password not found",
+                "Alias and password arguments not found",
             )),
         },
-        Some(Commands::Delete(_password)) => Ok(()),
+        Some(Commands::Delete(delete)) => match delete.alias {
+            Some(ref alias) => handlers::delete(alias),
+            None => Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Alias argument not found",
+            )),
+        },
         None => Ok(()),
     }
 }

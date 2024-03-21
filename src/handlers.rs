@@ -20,6 +20,7 @@ pub fn init() -> io::Result<()> {
                     fs::create_dir(home.clone() + "/rustPM")
                         .expect("Error creating the rpm dir on home directory");
                     let file = fs::File::create(utils::path());
+                    //TODO The file is no empty when created
                     match file {
                         Ok(_file) => {
                             let master = "Master".to_string();
@@ -68,6 +69,35 @@ pub fn list() -> io::Result<()> {
                 io::ErrorKind::UnexpectedEof,
                 "You don't have any password to list",
             )),
+        },
+        Err(e) => Err(e),
+    }
+}
+
+// pub fn find(alias: &String) -> io::Result<()> {
+//     match file::exist() {
+//         Ok(_) => {
+//             let contents = file::read()?;
+//             for password in contents {
+//                 let p: models::Password = serde_json::from_str(&password)?;
+//                 if p.alias == alias.to_string() {
+//                     return Ok(());
+//                 }
+//             }
+//             Err(io::Error::new(
+//                 io::ErrorKind::NotFound,
+//                 "Password not found",
+//             ))
+//         }
+//         Err(e) => Err(e),
+//     }
+// }
+
+pub fn delete(alias: &String) -> io::Result<()> {
+    match file::exist() {
+        Ok(_) => match utils::chech_master_password() {
+            Ok(_) => file::delete(alias),
+            Err(e) => Err(e),
         },
         Err(e) => Err(e),
     }
