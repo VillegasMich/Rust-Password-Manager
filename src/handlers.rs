@@ -12,7 +12,7 @@ pub fn init() -> io::Result<()> {
         Err(_) => {
             let master_pass = utils::master_password();
             match master_pass {
-                Ok(password) => {
+                Ok(_password) => {
                     let home = dirs::home_dir()
                         .expect("Home dir not found")
                         .to_str()
@@ -23,9 +23,9 @@ pub fn init() -> io::Result<()> {
                     let file = fs::File::create(utils::path());
                     match file {
                         Ok(_file) => {
-                            let master = "Master".to_string();
+                            // let master = "Master".to_string();
                             println!("passwords.json succesfull created in HOME directory");
-                            save(&master, &password)?;
+                            // save(&master, &password)?;
                             Ok(())
                         }
                         Err(e) => Err(e),

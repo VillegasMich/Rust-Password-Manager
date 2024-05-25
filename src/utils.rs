@@ -26,6 +26,8 @@ pub fn master_password() -> io::Result<String> {
             "The passwords are different, please try again",
         ))
     } else {
+        // Use the master password to hash a string and the result will be the
+        // decryption key and real master password
         Ok(master_1.trim().to_string())
     }
 }

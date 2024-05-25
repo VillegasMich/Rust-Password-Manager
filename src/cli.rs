@@ -16,18 +16,20 @@ pub enum Commands {
     Init,
     /// List all passwords
     List,
-    /// Save a password <Alias> <Password>
+    /// Save a password; <Master Password> <Alias> <Password>
     Save(Save),
-    /// Delete a saved password <Alias>
+    /// Delete a saved password; <Master Password> <Alias>
     Delete(Delete),
-    /// Find a specific saved password
+    /// Find a specific saved password; <Alias>
     Find(Find),
-    /// Get a specific saved password, and save it on your clipboard
+    /// Get a specific saved password, and save it on your clipboard; <Master Password> <Alias>
     Get(Get),
 }
 
 #[derive(Args)]
 pub struct Save {
+    /// The master password
+    pub master_password: Option<String>,
     /// The password alias
     pub alias: Option<String>,
     /// The password to save
@@ -36,6 +38,8 @@ pub struct Save {
 
 #[derive(Args)]
 pub struct Delete {
+    /// The master password
+    pub master_password: Option<String>,
     /// The alias of the password to delete, if it is located
     pub alias: Option<String>,
     // #[arg(short = 'f', long = "force")]
@@ -50,6 +54,8 @@ pub struct Find {
 
 #[derive(Args)]
 pub struct Get {
+    /// The master password
+    pub master_password: Option<String>,
     /// The alias of the password to get, if it is located
     pub alias: Option<String>,
 }
@@ -59,28 +65,40 @@ pub fn parse() -> io::Result<()> {
     match &cli.command {
         Some(Commands::Init) => handlers::init(),
         Some(Commands::List) => handlers::list(),
-        Some(Commands::Save(save)) => match (save.alias.clone(), save.password.clone()) {
-            (Some(ref alias), Some(ref password)) => handlers::save(alias, password),
-            (None, Some(ref _password)) => Err(io::Error::new(
+        Some(Commands::Save(save)) => match (
+            save.master_password.clone(),
+            save.alias.clone(),
+            save.password.clone(),
+        ) {
+            (Some(ref _master), Some(ref alias), Some(ref password)) => {
+                handlers::save(alias, password)
+            }
+            (_, None, Some(ref _password)) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Alias argument not found",
+                "Alias argument not found.",
             )),
-            (Some(ref _alias), None) => Err(io::Error::new(
+            (_, Some(ref _alias), None) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Password argument not found",
+                "Password argument not found.",
             )),
-            (None, None) => Err(io::Error::new(
+            (None, Some(ref _alias), Some(ref _password)) => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Alias and password arguments not found",
+                "master password argument not found.",
+            )),
+            (_, None, None) => Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Alias and password arguments not found.",
             )),
         },
-        Some(Commands::Delete(delete)) => match delete.alias {
-            Some(ref alias) => handlers::delete(alias),
-            None => Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "Alias argument not found",
-            )),
-        },
+        Some(Commands::Delete(delete)) => {
+            match (delete.master_password.clone(), delete.alias.clone()) {
+                (Some(ref _master), Some(ref alias)) => handlers::delete(alias),
+                _ => Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "Invalid arguments.",
+                )),
+            }
+        }
         Some(Commands::Find(find)) => match find.alias {
             Some(ref alias) => handlers::find(alias),
             None => Err(io::Error::new(
@@ -88,9 +106,9 @@ pub fn parse() -> io::Result<()> {
                 "Alias argument not found",
             )),
         },
-        Some(Commands::Get(get)) => match get.alias {
-            Some(ref alias) => handlers::get(alias),
-            None => Err(io::Error::new(
+        Some(Commands::Get(get)) => match (get.master_password.clone(), get.alias.clone()) {
+            (Some(ref _master), Some(ref alias)) => handlers::get(alias),
+            _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "Alias argument not found",
             )),
